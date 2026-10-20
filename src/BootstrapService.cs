@@ -25,6 +25,10 @@ namespace FocusHarbor
             }
 
             config = RestrictionService.EnforceFocusLock(config);
+            DateTimeOffset? filePause = RestrictionService.ReadPauseDeadline();
+            if (!config.AppGuardEnabled || (filePause.HasValue && filePause.Value > DateTimeOffset.Now))
+                foreach (var issue in FileAccessGuardService.Synchronize(config, true))
+                    JsonStore.AppendLog("File access recovery requires attention: " + issue.Key + " " + issue.Value);
             AlarmService.ApplySchedule(config, executablePath);
             AlarmService.EnsureActiveChallengeRunning(executablePath);
             AlarmService.EnsureQuarantineRecoveryTasks(executablePath);

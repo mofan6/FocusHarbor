@@ -34,6 +34,9 @@ namespace FocusHarbor
         public static readonly string FocusTimeBackupPath = Path.Combine(StateDirectory, "focus-time.backup.json");
         public static readonly string LogPath = Path.Combine(StateDirectory, "activity.log");
         public static readonly string GuardPidPath = Path.Combine(StateDirectory, "guard.pid");
+        public static readonly string FileAccessPath = Path.Combine(StateDirectory, "file-access-recovery.json");
+        public static readonly string FileAccessBackupPath = Path.Combine(StateDirectory, "file-access-recovery.backup.json");
+        public static readonly string GuardReportPath = Path.Combine(StateDirectory, "guard-report.json");
         public static readonly string SnapshotPath = Path.Combine(PauseStateDirectory, "browser-policy-snapshot.json");
         public static readonly string UsagePath = Path.Combine(PauseStateDirectory, "daily-usage.json");
         public static readonly string UsageBackupPath = Path.Combine(PauseStateDirectory, "daily-usage.backup.json");
@@ -463,6 +466,12 @@ namespace FocusHarbor
                 }
                 rule.TargetPath = rule.TargetPath ?? String.Empty;
                 rule.PackageFamilyName = (rule.PackageFamilyName ?? String.Empty).Trim();
+                if (String.Equals(rule.TargetKind, "File", StringComparison.OrdinalIgnoreCase) &&
+                    String.Equals(Path.GetExtension(rule.TargetPath), ".lnk", StringComparison.OrdinalIgnoreCase) && File.Exists(rule.TargetPath))
+                {
+                    try { rule.TargetPath = GuardedPathResolver.Resolve(rule.TargetPath); }
+                    catch { /* Keep a broken shortcut removable without losing its rule. */ }
+                }
                 // Older builds treated every selection made through "添加文件"
                 // as a passive file lock, even when the selected file was an EXE.
                 // Such rules are skipped by the process scanner, so migrate them
@@ -609,8 +618,8 @@ namespace FocusHarbor
 
         internal static bool IsExecutableTargetPath(string path)
         {
-            return !String.IsNullOrWhiteSpace(path) &&
-                   String.Equals(Path.GetExtension(path), ".exe", StringComparison.OrdinalIgnoreCase);
+            string extension = String.IsNullOrWhiteSpace(path) ? String.Empty : Path.GetExtension(path);
+            return new[] { ".exe", ".com", ".scr" }.Contains(extension, StringComparer.OrdinalIgnoreCase);
         }
 
         private static bool IsValidBrowserTarget(BrowserTargetConfig target)

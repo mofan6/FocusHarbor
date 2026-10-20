@@ -232,6 +232,7 @@ namespace FocusHarbor
         private void UpdateStatus()
         {
             FocusStatus status = RestrictionService.GetStatus(config, executablePath);
+            UpdateGuardRuntimeStatus(status);
             bool protectionsConfigured = config.BrowserRestrictionEnabled || config.AppGuardEnabled;
             bool focusActive = status.ConfigurationLocked;
             TextBlock heroBadge = Find<TextBlock>("HeroBadge");
@@ -1078,16 +1079,19 @@ namespace FocusHarbor
             }
             Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "选择专注期间禁止访问的文件",
+                Title = "选择专注期间禁止访问的文件或启动程序",
                 Filter = "所有文件|*.*",
                 CheckFileExists = true,
-                Multiselect = false
+                Multiselect = false,
+                DereferenceLinks = true
             };
             if (dialog.ShowDialog(window) != true)
             {
                 return;
             }
-            string selectedPath = Path.GetFullPath(dialog.FileName);
+            string selectedPath;
+            try { selectedPath = GuardedPathResolver.Resolve(dialog.FileName); }
+            catch (Exception exception) { ShowToast(exception.Message, false); return; }
             if (String.Equals(selectedPath, Path.GetFullPath(executablePath), StringComparison.OrdinalIgnoreCase) ||
                 IsPathInside(selectedPath, JsonStore.StateDirectory) || IsPathInside(selectedPath, JsonStore.PauseStateDirectory) || IsPathInside(selectedPath, JsonStore.GuardStateDirectory))
             {
@@ -1112,7 +1116,7 @@ namespace FocusHarbor
 
         internal static AppRuleConfig CreateCustomPathRule(string selectedPath)
         {
-            string fullPath = Path.GetFullPath(selectedPath);
+            string fullPath = GuardedPathResolver.Resolve(selectedPath);
             bool executable = JsonStore.IsExecutableTargetPath(fullPath);
             return new AppRuleConfig
             {
@@ -1129,6 +1133,35 @@ namespace FocusHarbor
                     : new List<string>(),
                 AllowedWindows = new List<TimeWindowConfig>()
             };
+        }
+
+        private void UpdateGuardRuntimeStatus(FocusStatus status)
+        {
+            GuardRuntimeReport report = null;
+            try
+            {
+                if (File.Exists(JsonStore.GuardReportPath)) report = JsonStore.Load<GuardRuntimeReport>(JsonStore.GuardReportPath);
+                if (report != null && DateTime.UtcNow.Ticks - report.UpdatedUtc > TimeSpan.FromSeconds(15).Ticks) report = null;
+            }
+            catch { }
+            if (appRuleItems == null) return;
+            foreach (AppRuleViewModel item in appRuleItems)
+            {
+                string text = String.Empty;
+                string runtime;
+                bool exactFile = String.Equals(item.Rule.TargetKind, "File", StringComparison.OrdinalIgnoreCase) ||
+                    String.Equals(item.Rule.TargetKind, "Executable", StringComparison.OrdinalIgnoreCase);
+                if (exactFile && config.AppGuardEnabled && item.Enabled)
+                {
+                    if (report != null && report.Entries != null && report.Entries.TryGetValue(item.Rule.TargetPath, out runtime) && runtime.Contains("恢复文件权限失败")) text = runtime;
+                    else if (status.TemporaryPauseActive) text = "临时解除中 · 文件访问已恢复";
+                    else if (!GuardService.ShouldBlockNow(item.Rule)) text = "当前为允许使用时段";
+                    else if (report != null && report.Entries != null && report.Entries.TryGetValue(item.Rule.TargetPath, out runtime)) text = runtime;
+                    else text = "等待后台确认拦截状态";
+                }
+                if (config.AppRules == null || !config.AppRules.Any(rule => rule.Id == item.Rule.Id)) text = "尚未保存 · 点击保存守卫规则后生效";
+                item.RuntimeStatus = text;
+            }
         }
 
         private void HandleAppRuleButtonClick(object sender, RoutedEventArgs args)
@@ -2088,6 +2121,12 @@ namespace FocusHarbor
         }
 
         public AppRuleConfig Rule { get; private set; }
+        private string runtimeStatus = String.Empty;
+        public string RuntimeStatus
+        {
+            get { return runtimeStatus; }
+            set { if (runtimeStatus != value) { runtimeStatus = value; RaisePropertyChanged("RuntimeStatus"); } }
+        }
         public string DisplayName { get { return Rule.DisplayName; } }
         public ImageSource IconSource { get { return IconService.GetRuleIcon(Rule); } }
         public string Badge

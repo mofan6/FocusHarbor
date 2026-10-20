@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -16,6 +17,9 @@ namespace FocusHarbor
         private const string StartupValueName = "FocusHarborGuard";
         private const string LegacyStartupValueName = "CodexAppTimeGuard";
         private const string StartupRegistryPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+        private static DateTime lastReportWrite = DateTime.MinValue;
+        private static string lastIssueSummary = String.Empty;
+        private static string verifiedGuardKey = String.Empty;
 
         public static void RunGuardLoop(string executablePath)
         {
@@ -87,6 +91,7 @@ namespace FocusHarbor
                         if (!config.AppGuardEnabled && !config.BrowserRestrictionEnabled)
                         {
                             ReleaseFileLocks(fileLocks);
+                            PublishReport(FileAccessGuardService.Synchronize(config, true));
                             FocusTimeService.Update(false, false);
                             Thread.Sleep(1000);
                             continue;
@@ -96,6 +101,8 @@ namespace FocusHarbor
                         if (pauseUntil.HasValue && pauseUntil.Value > DateTimeOffset.Now)
                         {
                             ReleaseFileLocks(fileLocks);
+                            Dictionary<string, string> restoreErrors = FileAccessGuardService.Synchronize(config, true);
+                            PublishReport(restoreErrors);
                             FocusTimeService.Update(false, false);
                             Thread.Sleep(750);
                             continue;
@@ -204,6 +211,8 @@ namespace FocusHarbor
 
         public static void DisableGuard(string executablePath)
         {
+            Dictionary<string, string> restoreErrors = FileAccessGuardService.Synchronize(null, true);
+            if (restoreErrors.Count != 0) throw new IOException(String.Join("；", restoreErrors.Values));
             using (RegistryKey runKey = Registry.CurrentUser.OpenSubKey(StartupRegistryPath, true))
             {
                 if (runKey != null)
@@ -220,6 +229,7 @@ namespace FocusHarbor
                 JsonStore.AppendLog("Guard recovery task removal failed: " + exception.Message);
             }
             StopGuardFromPid(executablePath);
+            if (IsGuardRunning(executablePath)) throw new IOException("后台守卫尚未退出，已保留进程身份记录，请重试。");
             try
             {
                 if (File.Exists(JsonStore.GuardPidPath))
@@ -248,20 +258,38 @@ namespace FocusHarbor
                 }
                 using (Process process = Process.GetProcessById(pid))
                 {
-                    string actualPath = process.MainModule.FileName;
-                    if (!String.Equals(Path.GetFullPath(actualPath), Path.GetFullPath(executablePath), StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                    }
-                    return startedTicks > 0
-                        ? process.StartTime.ToUniversalTime().Ticks == startedTicks
-                        : HasModeArgument(ProcessCommandLineReader.Read(pid), "--guard");
+                    return IsOwnedGuardProcess(process, executablePath, startedTicks);
                 }
             }
             catch
             {
                 return false;
             }
+        }
+
+        internal static bool IsCompatibleGuardExecutable(string actualPath, string expectedPath)
+        {
+            if (PathsEqual(actualPath, expectedPath)) return true;
+            try
+            {
+                string ownName = Assembly.GetExecutingAssembly().GetName().Name;
+                return AssemblyName.GetAssemblyName(actualPath).Name == ownName && AssemblyName.GetAssemblyName(expectedPath).Name == ownName;
+            }
+            catch { return false; }
+        }
+
+        private static bool IsOwnedGuardProcess(Process process, string expectedPath, long startedTicks)
+        {
+            long actualTicks = process.StartTime.ToUniversalTime().Ticks;
+            if (startedTicks > 0 && actualTicks != startedTicks) return false;
+            string actualPath = ProcessIdentityReader.ReadImagePath(process);
+            if (PathsEqual(actualPath, expectedPath))
+                return startedTicks > 0 || HasModeArgument(ProcessCommandLineReader.Read(process.Id), "--guard");
+            string key = process.Id + "|" + actualTicks + "|" + actualPath + "|" + expectedPath;
+            if (verifiedGuardKey == key) return true;
+            if (!IsCompatibleGuardExecutable(actualPath, expectedPath) || !HasModeArgument(ProcessCommandLineReader.Read(process.Id), "--guard")) return false;
+            verifiedGuardKey = key;
+            return true;
         }
 
         public static void RemoveLegacyStartupAndStopGuard()
@@ -312,16 +340,23 @@ namespace FocusHarbor
                 : new List<AppRuleConfig>();
             List<AppRuleConfig> blockingRules = activeRules.Where(ShouldBlockNow).ToList();
             bool hasPackagedRules = blockingRules.Any(rule => String.Equals(rule.TargetKind, "PackagedApplication", StringComparison.OrdinalIgnoreCase));
-            SynchronizeFileLocks(blockingRules, fileLocks);
+            Dictionary<string, string> accessErrors = FileAccessGuardService.Synchronize(config, false);
+            Dictionary<string, string> report = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (AppRuleConfig rule in blockingRules)
+                if (!String.IsNullOrWhiteSpace(rule.TargetPath) && String.Equals(rule.TargetKind, "File", StringComparison.OrdinalIgnoreCase) &&
+                    !accessErrors.ContainsKey(rule.TargetPath)) report[rule.TargetPath] = "已限制新读取 · 已打开的内容需先关闭";
 
             List<BrowserTargetConfig> blockedBrowsers = config.BrowserRestrictionEnabled && config.BrowserTargets != null
                 ? config.BrowserTargets.Where(browser => browser != null && String.Equals(browser.PolicyKind, "BlockProcess", StringComparison.OrdinalIgnoreCase) && !String.IsNullOrWhiteSpace(browser.ExecutablePath)).ToList()
                 : new List<BrowserTargetConfig>();
             Process[] processes = Process.GetProcesses();
+            int ownPid;
+            using (Process current = Process.GetCurrentProcess()) ownPid = current.Id;
             foreach (Process process in processes)
             {
                 try
                 {
+                    if (process.Id == ownPid) continue;
                     // Packaged applications can reject MainModule access even
                     // when the guard and target belong to the same user.
                     string processPath = ProcessIdentityReader.ReadImagePath(process);
@@ -357,14 +392,21 @@ namespace FocusHarbor
                         break;
                     }
                 }
-                catch
+                catch (Exception exception)
                 {
+                    string path = ProcessIdentityReader.ReadImagePath(process);
+                    if (!String.IsNullOrWhiteSpace(path) && blockingRules.Any(rule => PathsEqual(path, rule.TargetPath)))
+                        report[path] = "进程拦截失败：" + exception.Message + "（目标可能以更高权限运行）";
                 }
                 finally
                 {
                     process.Dispose();
                 }
             }
+            SynchronizeFileLocks(blockingRules, fileLocks, accessErrors, report);
+            foreach (KeyValuePair<string, string> error in accessErrors)
+                if (!report.ContainsKey(error.Key)) report[error.Key] = error.Value;
+            PublishReport(report);
         }
 
         private static void EnforceCodexPenalty()
@@ -448,7 +490,7 @@ namespace FocusHarbor
                    packageFullName.StartsWith("OpenAI.Codex_", StringComparison.OrdinalIgnoreCase);
         }
 
-        private static bool ShouldBlockNow(AppRuleConfig rule)
+        internal static bool ShouldBlockNow(AppRuleConfig rule)
         {
             return String.Equals(rule.Mode, "AlwaysBlocked", StringComparison.OrdinalIgnoreCase) ||
                    (String.Equals(rule.Mode, "Scheduled", StringComparison.OrdinalIgnoreCase) && !IsWithinAllowedWindow(rule));
@@ -472,10 +514,12 @@ namespace FocusHarbor
                    IsPathInsideRoot(processPath, rule.RootPath);
         }
 
-        private static void SynchronizeFileLocks(IEnumerable<AppRuleConfig> blockingRules, IDictionary<string, FileStream> fileLocks)
+        internal static void SynchronizeFileLocks(IEnumerable<AppRuleConfig> blockingRules, IDictionary<string, FileStream> fileLocks,
+            IDictionary<string, string> accessErrors, IDictionary<string, string> report)
         {
             HashSet<string> desired = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (AppRuleConfig rule in blockingRules.Where(rule => String.Equals(rule.TargetKind, "File", StringComparison.OrdinalIgnoreCase)))
+            foreach (AppRuleConfig rule in blockingRules.Where(rule => String.Equals(rule.TargetKind, "Executable", StringComparison.OrdinalIgnoreCase) ||
+                (String.Equals(rule.TargetKind, "File", StringComparison.OrdinalIgnoreCase) && accessErrors.ContainsKey(rule.TargetPath ?? String.Empty))))
             {
                 try
                 {
@@ -484,10 +528,9 @@ namespace FocusHarbor
                         desired.Add(Path.GetFullPath(rule.TargetPath));
                     }
                 }
-                catch
+                catch (Exception exception)
                 {
-                    // One malformed or temporarily unavailable path must not stop
-                    // enforcement of every other application and file rule.
+                    report[rule.TargetPath ?? String.Empty] = "无法锁定目标：" + exception.Message;
                 }
             }
 
@@ -503,11 +546,29 @@ namespace FocusHarbor
                     fileLocks[path] = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None);
                     JsonStore.AppendLog("LOCK FILE " + path);
                 }
-                catch
+                catch (Exception exception)
                 {
-                    // The file may already be open. The next enforcement cycle retries.
+                    if (!report.ContainsKey(path)) report[path] = "尚未锁定：" + exception.Message + "；请关闭占用程序后重试";
                 }
             }
+            foreach (string path in fileLocks.Keys)
+                if (!report.ContainsKey(path)) report[path] = "已独占锁定 · 禁止新读取或启动";
+            foreach (AppRuleConfig rule in blockingRules)
+                if (!String.IsNullOrWhiteSpace(rule.TargetPath) && !File.Exists(rule.TargetPath) &&
+                    (String.Equals(rule.TargetKind, "File", StringComparison.OrdinalIgnoreCase) || String.Equals(rule.TargetKind, "Executable", StringComparison.OrdinalIgnoreCase)))
+                    report[rule.TargetPath] = "目标文件不存在 · 请在解除期间检查路径";
+        }
+
+        private static void PublishReport(Dictionary<string, string> entries)
+        {
+            string summary = String.Join("|", entries.OrderBy(item => item.Key).Select(item => item.Key + "=" + item.Value));
+            if (summary == lastIssueSummary && (DateTime.UtcNow - lastReportWrite).TotalSeconds < 3) return;
+            if (summary != lastIssueSummary)
+                foreach (KeyValuePair<string, string> item in entries.Where(item => item.Value.Contains("失败") || item.Value.Contains("尚未") || item.Value.Contains("未生效")))
+                    JsonStore.AppendLog("GUARD ISSUE " + item.Key + " " + item.Value);
+            JsonStore.Save(JsonStore.GuardReportPath, new GuardRuntimeReport { UpdatedUtc = DateTime.UtcNow.Ticks, Entries = entries });
+            lastIssueSummary = summary;
+            lastReportWrite = DateTime.UtcNow;
         }
 
         private static void ReleaseFileLocks(IDictionary<string, FileStream> fileLocks)
@@ -623,11 +684,7 @@ namespace FocusHarbor
                 }
                 using (Process process = Process.GetProcessById(pid))
                 {
-                    string actualPath = process.MainModule.FileName;
-                    bool sameInstance = startedTicks > 0
-                        ? process.StartTime.ToUniversalTime().Ticks == startedTicks
-                        : HasModeArgument(ProcessCommandLineReader.Read(pid), "--guard");
-                    if (String.Equals(Path.GetFullPath(actualPath), Path.GetFullPath(executablePath), StringComparison.OrdinalIgnoreCase) && sameInstance)
+                    if (IsOwnedGuardProcess(process, executablePath, startedTicks))
                     {
                         process.Kill();
                         process.WaitForExit(3000);
@@ -678,6 +735,12 @@ namespace FocusHarbor
             }
             return true;
         }
+    }
+
+    public sealed class GuardRuntimeReport
+    {
+        public long UpdatedUtc { get; set; }
+        public Dictionary<string, string> Entries { get; set; }
     }
 
     internal static class ProcessCommandLineReader

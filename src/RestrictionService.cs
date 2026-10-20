@@ -262,6 +262,7 @@ namespace FocusHarbor
                         JsonStore.AtomicWrite(JsonStore.PauseUntilPath, pauseUntil.ToString("o", CultureInfo.InvariantCulture), Encoding.ASCII);
                         changesApplied = true;
                         RemoveBrowserPolicies(config);
+                        RestoreFileAccessForPause();
                         JsonStore.DeleteFocusLock();
                         TaskSchedulerService.RegisterOnce(
                             TaskSchedulerService.TemporaryRestoreTaskName,
@@ -393,6 +394,7 @@ namespace FocusHarbor
                         JsonStore.AtomicWrite(JsonStore.PauseUntilPath, pauseUntil.ToString("o", CultureInfo.InvariantCulture), Encoding.ASCII);
                         changesApplied = true;
                         RemoveBrowserPolicies(config);
+                        RestoreFileAccessForPause();
                         JsonStore.DeleteFocusLock();
                         TaskSchedulerService.RegisterOnce(
                             TaskSchedulerService.TemporaryRestoreTaskName,
@@ -597,6 +599,7 @@ namespace FocusHarbor
                             config.BrowserRestrictionEnabled = false;
                             config.AppGuardEnabled = false;
                             JsonStore.SaveConfig(config);
+                            RestoreFileAccessForPause();
                             if ((config.Alarm != null && config.Alarm.Enabled) || AlarmService.IsChallengeActive())
                             {
                                 GuardService.EnableGuard(executablePath);
@@ -713,6 +716,7 @@ namespace FocusHarbor
         {
             DateTimeOffset? pauseUntil = ReadPauseDeadline();
             bool pauseActive = pauseUntil.HasValue && pauseUntil.Value > DateTimeOffset.Now;
+            if (pauseActive || !config.AppGuardEnabled) RestoreFileAccessForPause();
             if (!pauseActive)
             {
                 ApplyBrowserPolicies(config);
@@ -740,6 +744,12 @@ namespace FocusHarbor
                 JsonStore.DeleteFocusLock();
             }
             FocusTimeService.Update(IsFocusLocked(config), true);
+        }
+
+        private static void RestoreFileAccessForPause()
+        {
+            Dictionary<string, string> errors = FileAccessGuardService.Synchronize(null, true);
+            if (errors.Count != 0) throw new IOException(String.Join("；", errors.Values));
         }
 
         public static bool BrowserPoliciesMatch(FocusConfig config)
