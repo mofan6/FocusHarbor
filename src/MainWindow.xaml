@@ -1,0 +1,580 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        x:Name="RootWindow"
+        Title="Focus Harbor · 专注中枢"
+        Width="1080" Height="740" MinWidth="940" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="CanResize"
+        Background="#FF080C18"
+        FontFamily="Microsoft YaHei UI" Foreground="#FFF4F7FF"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextHintingMode="Auto"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="7" CornerRadius="16" GlassFrameThickness="0"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFF4F7FF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FF98A4BE"/>
+        <SolidColorBrush x:Key="Accent" Color="#FF7C6BFF"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#FF33D6C8"/>
+        <LinearGradientBrush x:Key="CardBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#D11A2238" Offset="0"/>
+            <GradientStop Color="#B911192B" Offset="0.55"/>
+            <GradientStop Color="#A70C1424" Offset="1"/>
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="CardBorder" Color="#2EFFFFFF"/>
+
+        <Style x:Key="CardBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="#3BFFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Height" Value="46"/>
+            <Setter Property="Margin" Value="0,3"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Foreground" Value="#FF9DA8C0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="NavSurface" Background="{TemplateBinding Background}" CornerRadius="12">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="NavSurface" Property="Background" Value="#167C6BFF"/>
+                                <Setter Property="Foreground" Value="#FFEAE7FF"/>
+                            </Trigger>
+                            <Trigger Property="Tag" Value="active">
+                                <Setter TargetName="NavSurface" Property="Background" Value="#267C6BFF"/>
+                                <Setter Property="Foreground" Value="#FFFFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="NavSurface" Property="Opacity" Value="0.78"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Background" Value="#FF7563F6"/>
+            <Setter Property="BorderBrush" Value="#707C6BFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="#FF8474FF"/>
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="#A8B4A8FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="#FF6251DE"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.42"/><Setter Property="Cursor" Value="Arrow"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="#FFE9EDF7"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="Background" Value="#8A151D31"/>
+            <Setter Property="BorderBrush" Value="#4E71809D"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#B6222D46"/><Setter TargetName="Surface" Property="BorderBrush" Value="#8499BAE5"/></Trigger>
+                            <Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Background" Value="#D0141B2C"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value="0.36"/><Setter Property="Cursor" Value="Arrow"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RewardActionButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Padding" Value="8,0"/>
+        </Style>
+
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+            <Setter Property="Foreground" Value="#FFFF9FA7"/>
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button">
+            <Setter Property="Width" Value="40"/><Setter Property="Height" Value="36"/>
+            <Setter Property="Foreground" Value="#FF9BA6BC"/><Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/><Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="9"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Background" Value="#1EFFFFFF"/><Setter Property="Foreground" Value="White"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <Style x:Key="RuleSettingsButton" TargetType="Button" BasedOn="{StaticResource IconButton}">
+            <Setter Property="Width" Value="36"/><Setter Property="Height" Value="32"/><Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="Foreground" Value="#FFAFA7FF"/><Setter Property="Background" Value="#167C6BFF"/>
+            <Setter Property="ToolTip" Value="设置允许时间"/>
+        </Style>
+
+        <Style x:Key="ToggleStyle" TargetType="CheckBox">
+            <Setter Property="Width" Value="46"/><Setter Property="Height" Value="26"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Width="46" Height="26">
+                            <Border x:Name="Track" Background="#FF30394E" CornerRadius="13" BorderBrush="#30FFFFFF" BorderThickness="1"/>
+                            <Ellipse x:Name="Thumb" Width="20" Height="20" Margin="3" HorizontalAlignment="Left" Fill="#FFDCE3F2">
+                                <Ellipse.Effect><DropShadowEffect BlurRadius="5" ShadowDepth="1" Opacity="0.35"/></Ellipse.Effect>
+                            </Ellipse>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True"><Setter TargetName="Track" Property="Background" Value="#FF7563F6"/><Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right"/><Setter TargetName="Thumb" Property="Fill" Value="White"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Track" Property="Opacity" Value="0.45"/><Setter TargetName="Thumb" Property="Opacity" Value="0.6"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Foreground" Value="#FFFFFFFF"/><Setter Property="CaretBrush" Value="#FFFFFFFF"/><Setter Property="SelectionBrush" Value="#FF7563F6"/><Setter Property="SelectionOpacity" Value="0.65"/>
+            <Setter Property="Background" Value="#FF0D1628"/><Setter Property="BorderBrush" Value="#5A66738E"/><Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,7"/><Setter Property="FontSize" Value="14"/><Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        </Style>
+
+        <Style x:Key="InputShell" TargetType="Border">
+            <Setter Property="Background" Value="#FF0D1628"/><Setter Property="BorderBrush" Value="#5A66738E"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="11"/>
+            <Style.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter Property="BorderBrush" Value="#FF8878FF"/><Setter Property="Background" Value="#FF111C31"/></Trigger></Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModernComboBoxItem" TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="#FFDCE3F2"/><Setter Property="Padding" Value="11,8"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBoxItem"><Border x:Name="ItemSurface" Background="Transparent" CornerRadius="8" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsHighlighted" Value="True"><Setter TargetName="ItemSurface" Property="Background" Value="#287C6BFF"/><Setter Property="Foreground" Value="White"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemSurface" Property="Background" Value="#367C6BFF"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#FFEDF2FC"/><Setter Property="Background" Value="#FF11192A"/><Setter Property="BorderBrush" Value="#3AFFFFFF"/><Setter Property="BorderThickness" Value="1"/><Setter Property="Padding" Value="12,0"/><Setter Property="ItemContainerStyle" Value="{StaticResource ModernComboBoxItem}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="ComboSurface" Height="40" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="11">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="38"/></Grid.ColumnDefinitions>
+                                    <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" IsHitTestVisible="False"/>
+                                    <ToggleButton Grid.Column="1" Focusable="False" ClickMode="Press" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                        <ToggleButton.Template><ControlTemplate TargetType="ToggleButton"><Border Background="Transparent"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE70D;" Foreground="#FF8490A8" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></ToggleButton.Template>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+                            <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                                <Border Margin="0,6,0,0" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" MaxHeight="300" Padding="5" Background="#FF11192A" BorderBrush="#50FFFFFF" BorderThickness="1" CornerRadius="11"><Border.Effect><DropShadowEffect Color="#C0000000" BlurRadius="22" ShadowDepth="5" Opacity="0.55"/></Border.Effect><ScrollViewer><ItemsPresenter/></ScrollViewer></Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers><Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="ComboSurface" Property="BorderBrush" Value="#B07C6BFF"/></Trigger><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ComboSurface" Property="Background" Value="#FF172137"/></Trigger><Trigger Property="IsEnabled" Value="False"><Setter TargetName="ComboSurface" Property="Opacity" Value="0.55"/></Trigger></ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Foreground" Value="#FFDCE3F2"/><Setter Property="Padding" Value="12,9"/><Setter Property="Margin" Value="2"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem"><Border x:Name="ItemSurface" Background="Transparent" CornerRadius="9" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ItemSurface" Property="Background" Value="#18FFFFFF"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemSurface" Property="Background" Value="#317C6BFF"/><Setter Property="Foreground" Value="White"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <Style x:Key="ScrollRepeatButton" TargetType="RepeatButton">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="RepeatButton"><Border Background="Transparent"/></ControlTemplate></Setter.Value></Setter>
+        </Style>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Width="8" Background="Transparent">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <Track.DecreaseRepeatButton><RepeatButton Style="{StaticResource ScrollRepeatButton}" Command="ScrollBar.PageUpCommand"/></Track.DecreaseRepeatButton>
+                                <Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border x:Name="ThumbSurface" Width="5" Margin="1" Background="#52616E89" CornerRadius="3"/><ControlTemplate.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ThumbSurface" Property="Background" Value="#9A7C6BFF"/></Trigger></ControlTemplate.Triggers></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+                                <Track.IncreaseRepeatButton><RepeatButton Style="{StaticResource ScrollRepeatButton}" Command="ScrollBar.PageDownCommand"/></Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid x:Name="WindowSurface">
+        <Grid.Background>
+            <RadialGradientBrush Center="0.18,0.05" GradientOrigin="0.18,0.05" RadiusX="1.1" RadiusY="1.1">
+                <GradientStop Color="#FF1C1740" Offset="0"/><GradientStop Color="#FF0A1020" Offset="0.55"/><GradientStop Color="#FF070B15" Offset="1"/>
+            </RadialGradientBrush>
+        </Grid.Background>
+
+        <Canvas IsHitTestVisible="False" ClipToBounds="True">
+            <Ellipse Width="430" Height="430" Canvas.Left="630" Canvas.Top="-260" Opacity="0.19">
+                <Ellipse.Fill><RadialGradientBrush><GradientStop Color="#FF7967FF"/><GradientStop Color="#007967FF" Offset="1"/></RadialGradientBrush></Ellipse.Fill>
+                <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+                <Ellipse.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever" AutoReverse="True"><DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="0" To="-55" Duration="0:0:8"/><DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="0" To="38" Duration="0:0:10"/></Storyboard></BeginStoryboard></EventTrigger></Ellipse.Triggers>
+            </Ellipse>
+            <Ellipse Width="360" Height="360" Canvas.Left="130" Canvas.Top="520" Opacity="0.13">
+                <Ellipse.Fill><RadialGradientBrush><GradientStop Color="#FF27D6C5"/><GradientStop Color="#0027D6C5" Offset="1"/></RadialGradientBrush></Ellipse.Fill>
+                <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+                <Ellipse.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever" AutoReverse="True"><DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)" From="0" To="70" Duration="0:0:12"/><DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="0" To="-35" Duration="0:0:9"/></Storyboard></BeginStoryboard></EventTrigger></Ellipse.Triggers>
+            </Ellipse>
+        </Canvas>
+
+        <Grid>
+            <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#B90A0F1C" BorderBrush="#20FFFFFF" BorderThickness="0,0,1,0">
+                <Grid Margin="18,18,14,18">
+                    <Grid.RowDefinitions><RowDefinition Height="56"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                        <Border Width="38" Height="38" CornerRadius="12">
+                            <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF8B78FF"/><GradientStop Color="#FF35D7C8" Offset="1"/></LinearGradientBrush></Border.Background>
+                            <Grid><Ellipse Width="18" Height="18" Stroke="White" StrokeThickness="2"/><Ellipse Width="5" Height="5" Fill="White"/></Grid>
+                        </Border>
+                        <StackPanel Margin="11,1,0,0"><TextBlock Text="FOCUS HARBOR" FontFamily="Segoe UI" FontWeight="Bold" FontSize="13" Foreground="White"/><TextBlock Text="专注中枢" Foreground="#FF8792AA" FontSize="11" Margin="0,2,0,0"/></StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,25,0,0">
+                        <TextBlock Text="控制台" Foreground="#FF68748E" FontSize="11" FontWeight="Bold" Margin="12,0,0,8"/>
+                        <Button x:Name="OverviewNav" Style="{StaticResource NavButton}" Tag="active"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE80F;" FontSize="16" Width="27"/><TextBlock Text="总览"/></StackPanel></Button>
+                        <Button x:Name="BrowserNav" Style="{StaticResource NavButton}"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE774;" FontSize="16" Width="27"/><TextBlock Text="浏览器"/></StackPanel></Button>
+                        <Button x:Name="AppsNav" Style="{StaticResource NavButton}"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" FontSize="16" Width="27"/><TextBlock Text="应用守卫"/></StackPanel></Button>
+                        <Button x:Name="AlarmNav" Style="{StaticResource NavButton}"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7ED;" FontSize="16" Width="27"/><TextBlock Text="晨间闹钟"/></StackPanel></Button>
+                        <Button x:Name="RewardsNav" Style="{StaticResource NavButton}"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE735;" FontSize="16" Width="27"/><TextBlock Text="学习奖励"/></StackPanel></Button>
+                        <Button x:Name="SettingsNav" Style="{StaticResource NavButton}"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="16" Width="27"/><TextBlock Text="设置"/></StackPanel></Button>
+                    </StackPanel>
+
+                    <Border Grid.Row="2" Background="#12FFFFFF" CornerRadius="13" Padding="12">
+                        <StackPanel><StackPanel Orientation="Horizontal"><Ellipse x:Name="SidebarStatusDot" Width="8" Height="8" Fill="#FF33D6C8" Margin="0,0,8,0"/><TextBlock x:Name="SidebarStatus" Text="守卫运行中" FontSize="12" Foreground="#FFB7C1D7"/></StackPanel><TextBlock x:Name="GpuTierText" Text="GPU 渲染检测中" FontSize="10" Foreground="#FF66728A" Margin="16,5,0,0"/></StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions><RowDefinition Height="64"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent">
+                    <TextBlock x:Name="PageTitle" Text="总览" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Margin="28,0,0,0" Foreground="#FFDCE3F2"/>
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0" Background="#142D3951" BorderBrush="#32FFFFFF" BorderThickness="1" CornerRadius="12" Padding="2">
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="MinimizeButton" Style="{StaticResource IconButton}" Content="&#xE921;"/>
+                            <Button x:Name="MaximizeButton" Style="{StaticResource IconButton}" Content="&#xE922;"/>
+                            <Button x:Name="CloseButton" Style="{StaticResource IconButton}" Content="&#xE8BB;"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="28,4,28,26">
+                    <Grid x:Name="OverviewPage">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="16"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Border CornerRadius="22" Padding="28" BorderBrush="#38FFFFFF" BorderThickness="1">
+                            <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#D52A225B"/><GradientStop Color="#C3143345" Offset="1"/></LinearGradientBrush></Border.Background>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="210"/></Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <Border HorizontalAlignment="Left" Background="#1EFFFFFF" CornerRadius="20" Padding="11,5" Margin="0,0,0,14"><TextBlock x:Name="HeroBadge" Text="●  等待开启" Foreground="#FFC1CADC" FontSize="11" FontWeight="Bold"/></Border>
+                                    <TextBlock Text="把选择留给清醒的自己。" FontSize="29" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock x:Name="HeroSubtitle" Text="浏览器白名单与应用守卫正在协同工作。" TextWrapping="Wrap" FontSize="13" Foreground="#FFB5C0D6" Margin="0,10,0,16"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="PauseNowButton" Style="{StaticResource PrimaryButton}" Content="暂时解除 30 分钟" Width="188"/>
+                                        <StackPanel Margin="18,1,0,0"><TextBlock x:Name="DailyAllowanceText" Text="今日剩余 3 次" Foreground="#FF8F9BB4" FontSize="11"/><StackPanel Orientation="Horizontal" Margin="0,8,0,0"><Ellipse x:Name="UsageDot1" Width="8" Height="8" Fill="#FF7C6BFF" Margin="0,0,6,0"/><Ellipse x:Name="UsageDot2" Width="8" Height="8" Fill="#FF2D3549" Margin="0,0,6,0"/><Ellipse x:Name="UsageDot3" Width="8" Height="8" Fill="#FF2D3549" Margin="0,0,6,0"/><Ellipse x:Name="UsageDot4" Width="8" Height="8" Fill="#FF2D3549"/></StackPanel></StackPanel>
+                                    </StackPanel>
+                                    <WrapPanel Margin="0,12,0,0">
+                                        <Button x:Name="ResumeFocusButton" Style="{StaticResource SecondaryButton}" Content="立即恢复专注" Width="142" Height="36" Visibility="Collapsed" Margin="0,0,10,0" ToolTip="提前结束当前解除；已用普通额度与学习奖励不返还"/>
+                                        <Button x:Name="ForfeitAllowanceButton" Style="{StaticResource DangerButton}" Content="放弃今日剩余额度" Width="164" Height="36" ToolTip="需二次确认；当天不可撤销，学习奖励不受影响"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                                <Grid Grid.Column="1" Width="160" Height="160" HorizontalAlignment="Right">
+                                    <Ellipse Stroke="#18FFFFFF" StrokeThickness="10"/>
+                                    <Ellipse x:Name="PauseRing" Stroke="#FF53D9CB" StrokeThickness="10" StrokeDashArray="1.8,0.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" RenderTransformOrigin="0.5,0.5"><Ellipse.RenderTransform><RotateTransform Angle="-90"/></Ellipse.RenderTransform></Ellipse>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"><TextBlock x:Name="CountdownText" Text="待开启" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center"/><TextBlock x:Name="CountdownCaption" Text="配置保持" Foreground="#FF96A2B9" FontSize="11" HorizontalAlignment="Center" Margin="0,5,0,0"/></StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Grid Grid.Row="2" VerticalAlignment="Top">
+                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="16"/><ColumnDefinition/><ColumnDefinition Width="16"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CardBorderStyle}" Height="260" Padding="18">
+                                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#D31A2339"/><GradientStop Color="#C3111A2B" Offset="1"/></LinearGradientBrush></Border.Background>
+                                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Border Width="38" Height="38" CornerRadius="12" Background="#2433D6C8"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE774;" Foreground="#FF55DDD1" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel Grid.Column="1" Margin="11,0,0,0"><TextBlock Text="浏览器白名单" Foreground="#FF8F9BB4" FontSize="11"/><TextBlock x:Name="BrowserStatusLarge" Text="尚未开启" FontSize="17" FontWeight="Bold" Margin="0,3,0,0"/></StackPanel><Ellipse Grid.Column="2" Width="7" Height="7" Fill="#FF33D6C8" VerticalAlignment="Top" Margin="0,5,1,0"/></Grid>
+                                    <Border Grid.Row="2" Background="#8B0E1728" BorderBrush="#28FFFFFF" BorderThickness="1" CornerRadius="12" Padding="12,10"><TextBlock x:Name="BrowserPreviewText" Text="ChatGPT · Gemini · 本地文件" TextWrapping="Wrap" Foreground="#FFD0D8E7" FontSize="11" LineHeight="18"/></Border>
+                                    <Grid Grid.Row="4" MinHeight="52"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Border Background="#1528BFB3" CornerRadius="9" Padding="9,7"><StackPanel><TextBlock Text="策略状态" Foreground="#FF8492AA" FontSize="10" LineHeight="16"/><TextBlock Text="自动同步" Foreground="#FF9DDBD5" FontSize="11" FontWeight="Bold" LineHeight="18" Margin="0,1,0,0"/></StackPanel></Border><Border Grid.Column="1" Background="#151D88FF" CornerRadius="9" Padding="9,7" Margin="7,0,0,0"><StackPanel><TextBlock Text="本地文件" Foreground="#FF8492AA" FontSize="10" LineHeight="16"/><TextBlock Text="HTML · PDF" Foreground="#FFB7C9EC" FontSize="11" FontWeight="Bold" LineHeight="18" Margin="0,1,0,0"/></StackPanel></Border></Grid>
+                                    <TextBlock x:Name="BrowserStatusDetail" Grid.Row="5" Text="22 条规则 · 6 个浏览器" Foreground="#FF75829A" FontSize="10" Margin="0,9,0,0"/>
+                                </Grid>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}" Height="260" Padding="18">
+                                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#D3201D40"/><GradientStop Color="#C311192C" Offset="1"/></LinearGradientBrush></Border.Background>
+                                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><Border Width="38" Height="38" CornerRadius="12" Background="#287C6BFF"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE71D;" Foreground="#FFB4ABFF" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel Grid.Column="1" Margin="11,0,0,0"><TextBlock Text="应用与文件守卫" Foreground="#FF8F9BB4" FontSize="11"/><TextBlock x:Name="GuardStatusLarge" Text="尚未开启" FontSize="17" FontWeight="Bold" Margin="0,3,0,0"/></StackPanel><Ellipse Grid.Column="2" Width="7" Height="7" Fill="#FF8B78FF" VerticalAlignment="Top" Margin="0,5,1,0"/></Grid>
+                                    <Border Grid.Row="2" Background="#8B0E1728" BorderBrush="#28FFFFFF" BorderThickness="1" CornerRadius="12" Padding="12,10"><TextBlock x:Name="AppPreviewText" Text="暂无启用规则" TextWrapping="Wrap" Foreground="#FFD0D8E7" FontSize="11" LineHeight="18"/></Border>
+                                    <Grid Grid.Row="4" MinHeight="52"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Border Background="#157C6BFF" CornerRadius="9" Padding="9,7"><StackPanel><TextBlock Text="规则粒度" Foreground="#FF8492AA" FontSize="10" LineHeight="16"/><TextBlock Text="独立时段" Foreground="#FFC0B9FF" FontSize="11" FontWeight="Bold" LineHeight="18" Margin="0,1,0,0"/></StackPanel></Border><Border Grid.Column="1" Background="#1528BFB3" CornerRadius="9" Padding="9,7" Margin="7,0,0,0"><StackPanel><TextBlock Text="后台状态" Foreground="#FF8492AA" FontSize="10" LineHeight="16"/><TextBlock Text="实时守护" Foreground="#FF9DDBD5" FontSize="11" FontWeight="Bold" LineHeight="18" Margin="0,1,0,0"/></StackPanel></Border></Grid>
+                                    <TextBlock x:Name="AppStatusDetail" Grid.Row="5" Text="5 条预置规则可配置" Foreground="#FF75829A" FontSize="10" Margin="0,9,0,0"/>
+                                </Grid>
+                            </Border>
+                            <Border Grid.Column="4" Style="{StaticResource CardBorderStyle}" Height="260" Padding="18">
+                                <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#CF123D45"/><GradientStop Color="#CA111A2B" Offset="1"/></LinearGradientBrush></Border.Background>
+                                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Width="38" Height="38" CornerRadius="12" Background="#2833D6C8"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE823;" Foreground="#FF6CE1D6" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><StackPanel Grid.Column="1" Margin="11,0,0,0"><TextBlock Text="累计专注" Foreground="#FF9FC4C9" FontSize="11"/><TextBlock x:Name="FocusTotalText" Text="0 分钟" FontSize="21" FontWeight="Bold" Foreground="#FF75E1D6" Margin="0,2,0,0"/></StackPanel></Grid>
+                                    <Border Grid.Row="2" Background="#5C21AFA3" BorderBrush="#3033D6C8" BorderThickness="1" CornerRadius="12" Padding="12,10"><StackPanel><TextBlock Text="本次记录状态" Foreground="#FF78BFB8" FontSize="9"/><TextBlock x:Name="FocusAccountingText" Text="开启任一防护后开始累计" TextWrapping="Wrap" Foreground="#FFC0DBD8" FontSize="11" LineHeight="18" Margin="0,4,0,0"/></StackPanel></Border>
+                                    <Grid Grid.Row="4" MinHeight="52"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Border Background="#1628BFB3" CornerRadius="9" Padding="9,7"><StackPanel><TextBlock Text="关闭窗口" Foreground="#FF8492AA" FontSize="10" LineHeight="16"/><TextBlock Text="持续记录" Foreground="#FF9DDBD5" FontSize="11" FontWeight="Bold" LineHeight="18" Margin="0,1,0,0"/></StackPanel></Border><Border Grid.Column="1" Background="#157C6BFF" CornerRadius="9" Padding="9,7" Margin="7,0,0,0"><StackPanel><TextBlock Text="再次启动" Foreground="#FF8492AA" FontSize="10" LineHeight="16"/><TextBlock Text="自动补算" Foreground="#FFC0B9FF" FontSize="11" FontWeight="Bold" LineHeight="18" Margin="0,1,0,0"/></StackPanel></Border></Grid>
+                                    <TextBlock Grid.Row="5" Text="数据保存在本机 · 自动保存" Foreground="#FF75829A" FontSize="10" Margin="0,9,0,0"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="BrowserPage" Visibility="Collapsed" Opacity="0">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Border Style="{StaticResource CardBorderStyle}">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="浏览器白名单" FontSize="21" FontWeight="Bold"/><TextBlock x:Name="BrowserCoverageText" Text="自动覆盖电脑中发现的浏览器；本地 HTML、PDF 通过 file:// 规则打开。" Foreground="#FF8995AD" FontSize="12" Margin="0,7,0,0"/></StackPanel><CheckBox x:Name="BrowserEnabledToggle" Grid.Column="1" Style="{StaticResource ToggleStyle}" VerticalAlignment="Center"/></Grid>
+                        </Border>
+                        <Border x:Name="BrowserLockBanner" Grid.Row="2" Background="#20FFB86C" BorderBrush="#55FFB86C" BorderThickness="1" CornerRadius="11" Padding="13,9"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72E;" Foreground="#FFFFC77C" Margin="0,0,9,0"/><TextBlock Text="专注状态已锁定：临时解除后才能修改浏览器规则。" Foreground="#FFFFD7A0" FontSize="11"/></StackPanel></Border>
+                        <Grid x:Name="BrowserSettingsPanel" Grid.Row="4">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="270"/></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CardBorderStyle}">
+                                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/><RowDefinition Height="14"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <Grid><TextBlock Text="已放行规则" FontSize="14" FontWeight="Bold"/><TextBlock x:Name="AllowlistCountText" Text="22" HorizontalAlignment="Right" Foreground="#FF7E8AA2"/></Grid>
+                                    <ListBox x:Name="AllowlistBox" Grid.Row="2" Background="#86101625" BorderBrush="#24FFFFFF" BorderThickness="1" Padding="5"/>
+                                    <StackPanel Grid.Row="4" Orientation="Horizontal"><Button x:Name="RemoveDomainButton" Style="{StaticResource DangerButton}" Content="移除所选" Width="108"/><Button x:Name="ApplyBrowserButton" Style="{StaticResource PrimaryButton}" Content="应用更改" Width="118" Margin="10,0,0,0"/></StackPanel>
+                                </Grid>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                                <StackPanel><TextBlock Text="添加网站" FontSize="14" FontWeight="Bold"/><TextBlock Text="输入域名、URL 或受支持的策略模式。域名规则会覆盖该站全部路径。" TextWrapping="Wrap" Foreground="#FF7F8BA3" FontSize="11" Margin="0,8,0,18"/><TextBlock Text="规则" Foreground="#FF9AA5BA" FontSize="11" Margin="2,0,0,7"/><Border Style="{StaticResource InputShell}" Height="42"><TextBox x:Name="DomainInput" Background="Transparent" BorderThickness="0" Padding="13,0" VerticalContentAlignment="Center" HorizontalScrollBarVisibility="Hidden"/></Border><Button x:Name="AddDomainButton" Style="{StaticResource SecondaryButton}" Content="加入白名单" Margin="0,12,0,0"/><Border Background="#142AD8C8" BorderBrush="#3033D6C8" BorderThickness="1" CornerRadius="12" Padding="13" Margin="0,22,0,0"><StackPanel><TextBlock Text="提示" Foreground="#FF69E0D4" FontWeight="Bold" FontSize="11"/><TextBlock Text="浏览器通常会在数秒内刷新企业策略；若页面仍显示旧状态，请完全重启浏览器。" TextWrapping="Wrap" Foreground="#FF8FA7B5" FontSize="11" Margin="0,7,0,0"/></StackPanel></Border></StackPanel>
+                            </Border>
+                        </Grid>
+                    </Grid>
+
+                    <Grid x:Name="AppsPage" Visibility="Collapsed" Opacity="0">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Border Style="{StaticResource CardBorderStyle}"><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="应用与文件守卫" FontSize="21" FontWeight="Bold"/><TextBlock Text="传统软件按路径、商店应用按应用包身份守卫；普通文件独占锁定。" Foreground="#FF8995AD" FontSize="12" Margin="0,7,0,0"/></StackPanel><CheckBox x:Name="AppGuardEnabledToggle" Grid.Column="1" Style="{StaticResource ToggleStyle}" VerticalAlignment="Center"/></Grid></Border>
+                        <Border x:Name="AppsLockBanner" Grid.Row="2" Background="#20FFB86C" BorderBrush="#55FFB86C" BorderThickness="1" CornerRadius="11" Padding="13,9"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72E;" Foreground="#FFFFC77C" Margin="0,0,9,0"/><TextBlock Text="专注状态已锁定：临时解除后才能增删或修改守卫规则。" Foreground="#FFFFD7A0" FontSize="11"/></StackPanel></Border>
+                        <Grid x:Name="AppsEditorPanel" Grid.Row="4">
+                            <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                            <Border Style="{StaticResource CardBorderStyle}" Padding="14">
+                                <Grid>
+                                    <Grid x:Name="AppAddControls"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="44"/><ColumnDefinition Width="126"/><ColumnDefinition Width="112"/></Grid.ColumnDefinitions>
+                                        <ComboBox x:Name="InstalledSoftwarePicker" Style="{StaticResource ModernComboBox}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Height="28"><Grid.ColumnDefinitions><ColumnDefinition Width="34"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                        <Border Width="28" Height="28" CornerRadius="8" Background="#267C6BFF"><Grid><TextBlock Text="{Binding Initial}" Foreground="#FFD8D2FF" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/><Image Source="{Binding IconSource}" Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid></Border>
+                                                        <Grid Grid.Column="1" Margin="9,0,0,0"><Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions><TextBlock Text="{Binding DisplayName}" Foreground="#FFF1F4FB" FontWeight="Bold" FontSize="11" TextTrimming="CharacterEllipsis"/><TextBlock Grid.Row="1" Text="{Binding LocationText}" Foreground="#FF738099" FontSize="9" TextTrimming="CharacterEllipsis"/></Grid>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <Button x:Name="RefreshInstalledAppsButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" Height="40" Margin="8,0,0,0" Padding="0" ToolTip="重新扫描传统软件与 Microsoft Store 应用"/>
+                                        <Button x:Name="AddInstalledAppButton" Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="添加已装软件" Height="40" Margin="10,0,0,0" Padding="10,0"/>
+                                        <Button x:Name="AddFileButton" Grid.Column="3" Style="{StaticResource SecondaryButton}" Content="添加文件" Height="40" Margin="10,0,0,0" Padding="10,0"/>
+                                    </Grid>
+                                    <Border x:Name="AppAddLockedSurface" Height="40" Background="#BF111A2B" BorderBrush="#3533D6C8" BorderThickness="1" CornerRadius="11"><StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72E;" Foreground="#FF6FE1D5" Margin="0,0,9,0"/><TextBlock Text="配置入口已封存 · 临时解除后可添加软件或文件" Foreground="#FF9FC2C9" FontSize="11"/></StackPanel></Border>
+                                </Grid>
+                            </Border>
+                            <ListBox x:Name="AppRulesBox" Grid.Row="2" Background="Transparent" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#A912192B" BorderBrush="#28FFFFFF" BorderThickness="1" CornerRadius="14" Padding="14" Margin="0,0,0,8">
+                                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="42"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <Border Width="34" Height="34" CornerRadius="10" Background="#257C6BFF"><Grid><TextBlock Text="{Binding Badge}" Foreground="#FFD8D2FF" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/><Image Source="{Binding IconSource}" Width="27" Height="27" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/></Grid></Border>
+                                                <StackPanel Grid.Column="1" Margin="11,0,14,0"><TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="13"/><TextBlock Text="{Binding Description}" TextTrimming="CharacterEllipsis" Foreground="#FF7D89A1" FontSize="10.5" Margin="0,5,0,0"/></StackPanel>
+                                                <Button Grid.Column="2" Style="{StaticResource RuleSettingsButton}" Tag="rule-settings" Content="&#xE713;" DataContext="{Binding}" VerticalAlignment="Center"/>
+                                                <Button Grid.Column="3" Style="{StaticResource RuleSettingsButton}" Tag="rule-delete" Content="&#xE74D;" Foreground="#FFFFB3A9" DataContext="{Binding}" VerticalAlignment="Center" ToolTip="删除此规则；不删除软件或文件，需处于解除限制状态"/>
+                                                <CheckBox Grid.Column="4" Style="{StaticResource ToggleStyle}" IsChecked="{Binding Enabled, Mode=TwoWay}" IsEnabled="{Binding CanToggle}" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right"><Button x:Name="RemoveAppRuleButton" Style="{StaticResource DangerButton}" Content="移除选中规则" Width="142"/><Button x:Name="ApplyAppsButton" Style="{StaticResource PrimaryButton}" Content="保存守卫规则" Width="145" Margin="10,0,0,0"/></StackPanel>
+                    </Grid>
+
+                    <Grid x:Name="AlarmPage" Visibility="Collapsed" Opacity="0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <Border Style="{StaticResource CardBorderStyle}" Padding="20">
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <StackPanel><TextBlock Text="晨间闹钟与打字任务" FontSize="21" FontWeight="Bold"/><TextBlock x:Name="AlarmScheduleStatusText" Text="未启用 · 配置保存后由 Windows 唤醒计时器触发" Foreground="#FF8995AD" FontSize="12" Margin="0,7,0,0"/></StackPanel>
+                                        <CheckBox x:Name="AlarmEnabledToggle" Grid.Column="1" Style="{StaticResource ToggleStyle}" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </Border>
+                                <Border x:Name="AlarmLockBanner" Background="#20FFB86C" BorderBrush="#55FFB86C" BorderThickness="1" CornerRadius="11" Padding="13,9" Margin="0,10,0,0" Visibility="Collapsed"><StackPanel Orientation="Horizontal"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE72E;" Foreground="#FFFFC77C" Margin="0,0,9,0"/><TextBlock x:Name="AlarmLockBannerText" Text="晨间闹钟配置仅可在每天 00:00–02:00 修改。" Foreground="#FFFFD7A0" FontSize="11"/></StackPanel></Border>
+                                <Grid x:Name="AlarmSettingsPanel" Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="330"/></Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <Border Style="{StaticResource CardBorderStyle}" Padding="18">
+                                            <StackPanel>
+                                                <TextBlock Text="唤醒设置" FontSize="15" FontWeight="Bold"/>
+                                                <Grid Margin="0,15,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="118"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                    <StackPanel><TextBlock Text="每天响铃时间" Foreground="#FF8E9AB2" FontSize="11" Margin="2,0,0,7"/><Border Style="{StaticResource InputShell}" Height="42"><TextBox x:Name="AlarmTimeInput" Text="07:00" Background="Transparent" BorderThickness="0" Padding="13,0" VerticalContentAlignment="Center" MaxLength="5"/></Border></StackPanel>
+                                                    <StackPanel Grid.Column="1" Margin="14,0,0,0"><TextBlock Text="闹铃音乐" Foreground="#FF8E9AB2" FontSize="11" Margin="2,0,0,7"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="104"/></Grid.ColumnDefinitions><Border Style="{StaticResource InputShell}" Height="42"><TextBox x:Name="AlarmMusicPathText" IsReadOnly="True" Background="Transparent" BorderThickness="0" Padding="13,0" VerticalContentAlignment="Center" HorizontalScrollBarVisibility="Hidden"/></Border><Button x:Name="ChooseAlarmMusicButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="选择音乐" Height="42" Margin="9,0,0,0" Padding="8,0"/></Grid></StackPanel>
+                                                </Grid>
+                                                <TextBlock Text="专用押金文件夹（必须是 E 盘的安全子文件夹）" Foreground="#FF8E9AB2" FontSize="11" Margin="2,16,0,7"/>
+                                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="112"/></Grid.ColumnDefinitions><Border Style="{StaticResource InputShell}" Height="42"><TextBox x:Name="AlarmDepositFolderText" IsReadOnly="True" Background="Transparent" BorderThickness="0" Padding="13,0" VerticalContentAlignment="Center" HorizontalScrollBarVisibility="Hidden"/></Border><Button x:Name="ChooseDepositFolderButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="选择文件夹" Height="42" Margin="9,0,0,0" Padding="8,0"/></Grid>
+                                                <Border Background="#1328BFB3" BorderBrush="#3033D6C8" BorderThickness="1" CornerRadius="12" Padding="13,10" Margin="0,16,0,0"><TextBlock Text="超时后三项同时执行：可恢复地隔离整个专用押金文件夹（120 小时后自动恢复）；立即恢复专注限制并在当天禁用临时解除；当天禁止启动 Codex。桌面、文档、云盘、系统与软件目录以及链接目录均会被拒绝。" TextWrapping="Wrap" Foreground="#FFA7D7D3" FontSize="11" LineHeight="18"/></Border>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Style="{StaticResource CardBorderStyle}" Padding="18" Margin="0,14,0,0">
+                                            <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="180"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                                <Grid><TextBlock Text="必须手打的内容" FontSize="15" FontWeight="Bold"/><TextBlock x:Name="AlarmCharacterCountText" Text="0 / 150 字符" HorizontalAlignment="Right" Foreground="#FF8E9AB2" FontSize="11"/></Grid>
+                                                <Border Grid.Row="2" Style="{StaticResource InputShell}"><TextBox x:Name="AlarmChallengeText" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Background="Transparent" BorderThickness="0" Padding="13,10" VerticalContentAlignment="Top"/></Border>
+                                                <TextBlock Grid.Row="3" Text="保存启用后，响铃起 15 分钟内必须逐字输入完全一致的内容；粘贴、剪切、复制、拖放均被禁用。" Foreground="#FF7F8BA3" TextWrapping="Wrap" FontSize="10.5" Margin="2,10,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                        <Button x:Name="SaveAlarmButton" Style="{StaticResource PrimaryButton}" Content="保存晨间闹钟" HorizontalAlignment="Right" Width="166" Margin="0,14,0,0"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}" Padding="18">
+                                        <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="8"/><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/><RowDefinition Height="12"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                            <TextBlock Text="押金隔离记录" FontSize="15" FontWeight="Bold"/>
+                                            <TextBlock Grid.Row="2" Text="只有闹钟任务超时才会产生记录。整个押金文件夹在满 120 小时后自动恢复；若原位置重名，则安全保留记录等待手动恢复。" Foreground="#FF7F8BA3" TextWrapping="Wrap" FontSize="10.5" LineHeight="17"/>
+                                            <ListBox x:Name="QuarantineList" Grid.Row="4" MinHeight="360" Background="#6A0D1525" BorderBrush="#24FFFFFF" BorderThickness="1" Padding="5" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                                <ListBox.ItemTemplate><DataTemplate><StackPanel><TextBlock Text="{Binding FileName}" FontWeight="Bold" FontSize="11" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding StatusText}" Foreground="#FF7D89A1" FontSize="9.5" Margin="0,4,0,0" TextWrapping="Wrap"/></StackPanel></DataTemplate></ListBox.ItemTemplate>
+                                            </ListBox>
+                                            <Grid Grid.Row="6"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Button x:Name="RefreshQuarantineButton" Style="{StaticResource SecondaryButton}" Content="刷新" Height="40"/><Button x:Name="RestoreQuarantineButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="恢复所选" Height="40" Margin="8,0,0,0"/></Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Text="提示：从完全关机状态通常无法自动开机；此功能面向睡眠/休眠，且主板与 Windows 必须允许唤醒计时器。" Foreground="#FF66728A" FontSize="10" Margin="4,14,0,4"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <Grid x:Name="RewardsPage" Visibility="Collapsed" Opacity="0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
+                                <Border CornerRadius="22" Padding="26" BorderBrush="#52FFFFFF" BorderThickness="1">
+                                    <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#E12B245B"/><GradientStop Color="#D0173C48" Offset="0.62"/><GradientStop Color="#C8101A2D" Offset="1"/></LinearGradientBrush></Border.Background>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="260"/></Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <Border HorizontalAlignment="Left" Background="#2533D6C8" BorderBrush="#3933D6C8" BorderThickness="1" CornerRadius="18" Padding="11,5"><TextBlock Text="SELF-HONESTY REWARD" Foreground="#FF8DE8DF" FontFamily="Segoe UI" FontSize="9.5" FontWeight="Bold"/></Border>
+                                            <TextBlock Text="认真完成，清醒奖励。" FontSize="27" FontWeight="Bold" Margin="0,13,0,0"/>
+                                            <TextBlock Text="每科每天确认一次；亲手写完说明，获得一份独立的 10 分钟解除额度。" Foreground="#FFB1BDD3" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                                            <Grid Width="210" Height="7" HorizontalAlignment="Left" Margin="0,19,0,0"><Border Background="#372C3854" CornerRadius="4"/><Rectangle x:Name="RewardProgressFill" Width="0" HorizontalAlignment="Left" RadiusX="4" RadiusY="4"><Rectangle.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#FF7C6BFF"/><GradientStop Color="#FF45D9CC" Offset="1"/></LinearGradientBrush></Rectangle.Fill></Rectangle></Grid>
+                                            <TextBlock x:Name="RewardProgressText" Text="今日已认真确认 0 / 4 科" Foreground="#FF8592AA" FontSize="10.5" Margin="0,8,0,0"/>
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Background="#5910182A" BorderBrush="#35FFFFFF" BorderThickness="1" CornerRadius="17" Padding="18" Margin="18,0,0,0">
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="当前可用" Foreground="#FF8E9BB3" FontSize="10.5"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0"><TextBlock x:Name="RewardAvailableText" Text="0 份" FontSize="29" FontWeight="Bold" Foreground="#FF70E1D6"/><TextBlock x:Name="RewardMinutesTotalText" Text="可用 0 分钟" Foreground="#FF92A2BD" FontSize="11" VerticalAlignment="Bottom" Margin="12,0,0,5"/></StackPanel>
+                                                <Button x:Name="UseRewardButton" Style="{StaticResource PrimaryButton}" Height="44" Margin="0,15,0,0" Padding="11,0"><StackPanel Orientation="Horizontal"><Border Width="26" Height="26" CornerRadius="8" Background="#35FFFFFF" BorderBrush="#60FFFFFF" BorderThickness="1" Margin="0,0,9,0"><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE785;" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border><TextBlock x:Name="RewardUseButtonText" Text="先完成一科并手写说明" VerticalAlignment="Center"/></StackPanel></Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <Border Background="#70101829" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="13" Padding="14,11" Margin="0,14,12,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="科目管理" FontSize="12.5" FontWeight="Bold"/>
+                                            <TextBlock x:Name="RewardSubjectManageHint" Text="仅在临时解除限制期间可以添加、删除或重命名" Foreground="#FF7F8CA5" FontSize="10.5" Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                        <Button x:Name="AddRewardSubjectButton" Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="＋ 添加科目" Width="112" Height="38" Padding="10,0" IsEnabled="False"/>
+                                    </Grid>
+                                </Border>
+
+                                <ItemsControl x:Name="RewardSubjects" Margin="0,12,0,0">
+                                    <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2"/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource CardBorderStyle}" Padding="18" Margin="0,0,12,12" Height="174">
+                                                <Grid>
+                                                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                        <Border Width="42" Height="42" CornerRadius="13" Background="#267C6BFF" BorderBrush="#30FFFFFF" BorderThickness="1"><TextBlock Text="{Binding Badge}" Foreground="{Binding Accent}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                                                        <StackPanel Grid.Column="1" Margin="12,1,0,0"><TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"/><TextBlock Text="{Binding Status}" Foreground="{Binding Accent}" FontSize="10.5" Margin="0,4,0,0"/></StackPanel>
+                                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Top">
+                                                            <Ellipse Width="7" Height="7" Fill="{Binding Accent}" Margin="0,12,7,0" VerticalAlignment="Top"/>
+                                                            <Button Tag="rename-reward-subject" DataContext="{Binding}" Style="{StaticResource IconButton}" Content="&#xE70F;" Width="31" Height="30" IsEnabled="{Binding ManageEnabled}" ToolTip="重命名科目"/>
+                                                            <Button Tag="delete-reward-subject" DataContext="{Binding}" Style="{StaticResource IconButton}" Content="&#xE74D;" Width="31" Height="30" Foreground="#FFFF929D" IsEnabled="{Binding ManageEnabled}" ToolTip="删除科目"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                    <TextBlock Grid.Row="1" Text="{Binding Description}" Foreground="#FF8290A9" FontSize="10.5" Margin="1,12,0,0" TextWrapping="Wrap"/>
+                                                    <Button Grid.Row="2" Tag="claim-reward" DataContext="{Binding}" Style="{StaticResource RewardActionButton}" Content="{Binding ActionText}" IsEnabled="{Binding ActionEnabled}" Height="42" FontSize="11.5"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Border Background="#122AD8C8" BorderBrush="#3033D6C8" BorderThickness="1" CornerRadius="13" Padding="14,10" Margin="0,2,12,4"><TextBlock Text="奖励只增加专注限制的临时解除时间，不消耗每日 3 次普通额度；若晨间任务超时，当天所有解除方式仍会被锁定。" Foreground="#FF9ECBC7" FontSize="10.5" TextWrapping="Wrap"/></Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <Grid x:Name="SettingsPage" Visibility="Collapsed" Opacity="0">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="12"/><RowDefinition Height="*"/><RowDefinition Height="10"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <Border Style="{StaticResource CardBorderStyle}" Padding="18"><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><StackPanel><TextBlock Text="设置与使用教程" FontSize="20" FontWeight="Bold"/><TextBlock Text="完整 Markdown 文档已编译进软件，可按功能、问题或关键词搜索。" Foreground="#FF8995AD" FontSize="11" Margin="0,6,0,0"/></StackPanel><Border Grid.Column="1" Background="#1D33D6C8" BorderBrush="#3033D6C8" BorderThickness="1" CornerRadius="14" Padding="10,5" VerticalAlignment="Center"><TextBlock Text="USERGUIDE.MD" Foreground="#FF7DDFD6" FontFamily="Consolas" FontSize="10" FontWeight="Bold"/></Border></Grid></Border>
+                        <Grid Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="14"/><ColumnDefinition Width="276"/></Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource CardBorderStyle}" Padding="16">
+                                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="10"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                                    <Border Style="{StaticResource InputShell}" Height="40"><Grid><TextBox x:Name="TutorialSearchBox" Background="Transparent" BorderThickness="0" Padding="38,0,12,0" VerticalContentAlignment="Center" HorizontalScrollBarVisibility="Hidden"/><TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE721;" Foreground="#FF77839B" FontSize="13" VerticalAlignment="Center" Margin="13,0,0,0" IsHitTestVisible="False"/><TextBlock x:Name="TutorialSearchHint" Text="在 UserGuide.md 中搜索…" Foreground="#FF657189" FontSize="11" VerticalAlignment="Center" Margin="38,0,0,0" IsHitTestVisible="False"/></Grid></Border>
+                                    <Border Grid.Row="2" Background="#6A0D1525" BorderBrush="#24FFFFFF" BorderThickness="1" CornerRadius="12" Padding="16">
+                                        <FlowDocumentScrollViewer x:Name="TutorialDocumentViewer" Background="Transparent" BorderThickness="0" IsToolBarVisible="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"/>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}" Padding="16">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel>
+                                    <TextBlock Text="当前规则" FontSize="14" FontWeight="Bold"/>
+                                    <Grid Margin="0,13,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Border Background="#70101829" CornerRadius="11" Padding="12"><StackPanel><TextBlock Text="临时解除" Foreground="#FF7D89A1" FontSize="10"/><TextBlock x:Name="PauseMinutesText" Text="30 分钟" FontSize="16" FontWeight="Bold" Margin="0,5,0,0"/></StackPanel></Border><Border Grid.Column="1" Background="#70101829" CornerRadius="11" Padding="12" Margin="8,0,0,0"><StackPanel><TextBlock Text="每日上限" Foreground="#FF7D89A1" FontSize="10"/><TextBlock x:Name="DailyPauseLimitText" Text="3 次" FontSize="16" FontWeight="Bold" Margin="0,5,0,0"/></StackPanel></Border></Grid>
+                                    <Border Height="1" Background="#20FFFFFF" Margin="0,16"/>
+                                    <TextBlock Text="维护" FontSize="14" FontWeight="Bold"/><TextBlock Text="按当前配置重建浏览器策略并确认后台守卫。" Foreground="#FF7E8AA2" TextWrapping="Wrap" FontSize="10.5" LineHeight="18" Margin="0,6,0,12"/>
+                                    <Button x:Name="ReapplyButton" Style="{StaticResource SecondaryButton}" Content="重新应用全部规则" Height="40"/>
+                                    <Border Height="1" Background="#20FFFFFF" Margin="0,16"/>
+                                    <TextBlock Text="立即解除全部限制" Foreground="#FFFFA2A9" FontWeight="Bold"/><TextBlock Text="停止守卫并移除浏览器策略；不会删除规则。" Foreground="#FF7E8AA2" TextWrapping="Wrap" FontSize="10.5" LineHeight="18" Margin="0,6,0,12"/>
+                                    <Button x:Name="RestoreAllButton" Style="{StaticResource DangerButton}" Content="恢复无限制状态" Height="40"/>
+                                </StackPanel></ScrollViewer>
+                            </Border>
+                        </Grid>
+                        <TextBlock Grid.Row="4" Text="Designed By MOTAN" HorizontalAlignment="Center" Foreground="#FF59647A" FontFamily="Segoe UI" FontSize="10" FontWeight="Bold"/>
+                    </Grid>
+
+                    <Border x:Name="ToastHost" Background="#F12B344A" BorderBrush="#45FFFFFF" BorderThickness="1" CornerRadius="12" Padding="15,10" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,2" Visibility="Collapsed" Opacity="0"><TextBlock x:Name="ToastText" Text="已保存" Foreground="White" FontSize="12"/></Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
